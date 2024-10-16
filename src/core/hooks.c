@@ -1,28 +1,19 @@
 // ************************************************************************** //
 //                                                                            //
 //                                                        :::      ::::::::   //
-//   te_entity.c                                        :+:      :+:    :+:   //
+//   hooks.c                                            :+:      :+:    :+:   //
 //                                                    +:+ +:+         +:+     //
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
-//   Created: 2024/10/05 21:11:42 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/05 21:17:29 by rgramati         ###   ########.fr       //
+//   Created: 2024/10/14 00:49:19 by rgramati          #+#    #+#             //
+//   Updated: 2024/10/16 22:52:11 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include <termengine.h>
 
-t_entity	*te_entity_init(t_terminal *t)
+void	te_terminal_hook(t_terminal *t, enum e_hook_types type, t_hook_func func, void *param)
 {
-	t_entity	entity;
-	void		*ptr;
-
-	entity = (t_entity){0};
-	ptr = ft_chunk_push(t->entities, &entity, sizeof(t_entity));
-	return (ptr);
-}
-
-void	te_entity_destroy(t_entity *e)
-{
-	(void)e;
+	t->hook_table.hooks[type] = func;
+	t->hook_table.params[type] = param;
 }

@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/02 14:15:54 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/07 21:20:34 by rgramati         ###   ########.fr       //
+//   Updated: 2024/10/17 00:24:58 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -19,9 +19,11 @@
 # include <assert.h>
 # include <sys/ioctl.h>
 
-# include <ft_chunk.h>
+# define CM_LIMG_IMPLEMENTAION
+# define CM_CHUNK_IMPLEMENTATION
+# include <cmem.h>
 
-# define TR_COLOR_TABLE \
+# define TE_COLOR_TABLE \
 	"000\000001\000002\000003\000004\000005\000006\000007\000"\
 	"008\000009\000010\000011\000012\000013\000014\000015\000"\
 	"016\000017\000018\000019\000020\000021\000022\000023\000"\
@@ -55,42 +57,46 @@
 	"240\000241\000242\000243\000244\000245\000246\000247\000"\
 	"248\000249\000250\000251\000252\000253\000254\000255\000"
 
-# define TR_W				274
-# define TR_H				77
+# define TE_W				384
+# define TE_H				108
 
-# define TR_BLEN			41
-# define TR_BLOCK			"▄"
+# define TE_BLEN			41
+# define TE_BLOCK			"▄"
 
-# define TR_BACKGROUND		0
-# define TR_FOREGROUND		1
+# define TE_BACKGROUND		0
+# define TE_FOREGROUND		1
 
-# define TR_ANSI_RGB_BG		"\033[48;2"
-# define TR_ANSI_RGB_FG		"\033[38;2"
-# define TR_ANSI_RESET		"\033[0m"
-# define TR_ANSI_CLEAR		"\033c"
-# define TR_ANSI_HOME		"\033[H"
-# define TR_ANSI_CURSOR_ON	"\033[?25h"
-# define TR_ANSI_CURSOR_OFF	"\033[?25l"
+# define TE_EOF				'\x04'
+# define TE_ESQ				'\x1b'
+
+# define TE_ANSI_RGB_BG		"\033[48;2"
+# define TE_ANSI_RGB_FG		"\033[38;2"
+# define TE_ANSI_RESET		"\033[0m"
+# define TE_ANSI_CLEAR		"\033c"
+# define TE_ANSI_HOME		"\033[H"
+# define TE_ANSI_CURSOR_ON	"\033[?25h"
+# define TE_ANSI_CURSOR_OFF	"\033[?25l"
 
 typedef enum e_rgb_colors
 {
-	TR_RGB_BLACK	= 0x00000000,
-	TR_RGB_RED		= 0x00FF0000,
-	TR_RGB_GREEN	= 0x0000FF00,
-	TR_RGB_BLUE		= 0x000000FF,
-	TR_RGB_YELLOW	= TR_RGB_RED | TR_RGB_GREEN,
-	TR_RGB_CYAN		= TR_RGB_GREEN | TR_RGB_BLUE,
-	TR_RGB_MAGENTA	= TR_RGB_BLUE | TR_RGB_RED,
-	TR_RGB_WHITE	= ~TR_RGB_BLACK
+	TE_RGB_BLACK		= 0x00000000,
+	TE_RGB_RED			= 0xFFFF0000,
+	TE_RGB_GREEN		= 0xFF00FF00,
+	TE_RGB_BLUE			= 0xFF0000FF,
+	TE_RGB_YELLOW		= TE_RGB_RED | TE_RGB_GREEN,
+	TE_RGB_CYAN			= TE_RGB_GREEN | TE_RGB_BLUE,
+	TE_RGB_MAGENTA		= TE_RGB_BLUE | TE_RGB_RED,
+	TE_RGB_WHITE		= ~TE_RGB_BLACK,
+	TE_RGB_TRANSPARENT	= TE_RGB_MAGENTA
 }	t_rgb_colors;
 
 typedef uint8_t				*t_screen;
 
 typedef struct s_terminal	t_terminal;
 
-typedef struct s_te_img		t_te_img;
+typedef struct s_hook_tab	t_hook_tab;
 
-typedef struct s_te_entity	t_entity;
+typedef struct s_te_img		t_te_img;
 
 typedef struct s_te_anim	t_te_anim;
 
@@ -102,16 +108,32 @@ typedef struct s_llist
 
 /* TERMINAL ***************************************************************** */
 
+enum e_hook_types
+{
+	TE_KEYDOWN,
+	TE_LOOP,
+	TE_KEYUP = 128
+};
+
+typedef void	*(* t_hook_func)(void *);
+
+struct s_hook_tab
+{
+	t_hook_func	hooks[256];
+	void		*params[256];
+	uint8_t		states[256];
+};
+
 struct s_terminal
 {
-	uint32_t	col;
-	uint32_t	row;
-	uint32_t	ifps;
-	t_chunk		*imgs;
-	t_chunk		*entities;
-	t_chunk		*anims;
-	t_screen	screen;
-	t_screen	back;
+	uint32_t		col;
+	uint32_t		row;
+	uint32_t		ifps;
+	t_cm_chunk		*imgs;
+	t_cm_chunk		*anims;
+	t_screen		screen;
+	t_screen		back;
+	t_hook_tab		hook_table;
 };
 
 t_terminal
@@ -125,6 +147,9 @@ te_loop(t_terminal *t);
 
 void
 te_terminal_fps_max(t_terminal *t, uint32_t fps);
+
+void
+te_terminal_hook(t_terminal *t, uint32_t type, t_hook_func func, void *param);
 
 t_screen
 te_screen_init(void);
@@ -150,8 +175,6 @@ te_terminal_img_index(t_terminal *t, t_te_img *img);
 void
 te_ansi(const char *seq);
 
-
-
 /* IMAGES ****************************************************************** */
 
 struct s_te_img
@@ -175,34 +198,16 @@ te_img_set_pixel(t_te_img *img, uint32_t x, uint32_t y, uint32_t color);
 void
 te_img_get_pixel(t_te_img *img, uint32_t x, uint32_t y, uint32_t *color);
 
-/* ENTITIES **************************************************************** */
-
-struct s_te_entity
-{
-	uint32_t	x;
-	uint32_t	y;
-	uint32_t	anim_size;
-	uint16_t	anim_state;
-	uint16_t	anim_frame;
-	uint8_t		anim_ids[32];
-	uint64_t	padd[2];
-};
-
-t_entity
-*te_entity_init(t_terminal *t);
-
-void
-te_entity_destroy(t_entity *e);
-
 /* ANIMATIONS ************************************************************** */
 
 struct s_te_anim
 {
-	uint8_t	frames[32];
+	uint8_t		frames[32];
+	uint32_t	count;
 };
 
 t_te_anim
-*te_anim_init(t_terminal *t, t_entity *e);
+*te_anim_init(const char *dirname, t_cm_chunk *chunk);
 
 void
 te_anim_destroy(t_terminal *t, t_te_anim *anim);

@@ -1,12 +1,12 @@
 // ************************************************************************** //
 //                                                                            //
 //                                                        :::      ::::::::   //
-//   te_img.c                                           :+:      :+:    :+:   //
+//   images.c                                           :+:      :+:    :+:   //
 //                                                    +:+ +:+         +:+     //
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/03 17:50:24 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/05 21:40:49 by rgramati         ###   ########.fr       //
+//   Updated: 2024/10/16 22:52:26 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -15,29 +15,36 @@
 #include <stdlib.h>
 #include <termengine.h>
 
+t_cm_chunk	*chunk_next(t_cm_chunk *c)
+{
+	return (((struct s_cm_chunk *)c)->next);
+}
+
 t_te_img	*te_img_init(t_terminal *term, uint32_t row, uint32_t col)
 {
 	t_te_img	*img;
-	t_chunk		*chunk;
+	t_cm_chunk		*chunk;
 
 	chunk = term->imgs;
 	while (1)
 	{
-		while (chunk->next)
-			chunk = chunk->next;
-		img = ft_chunk_alloc(term->imgs);
+		while (chunk_next(chunk))
+			chunk = chunk_next(chunk);
+		img = cm_chunk_alloc(term->imgs);
 		if (!img)
 			break ;
 		if (row > term->row || col > term->col)
 			break ;
 		img->row = row;
 		img->col = col;
+		img->x = 0;
+		img->y = 0;
 		img->data = malloc(row * col * sizeof(uint32_t));
 		if (!img->data)
 			break ;
-		ft_memzero(img->data, row * col * sizeof(uint32_t));
-		if (chunk->iterator.index == chunk->size)
-			chunk->next = ft_chunk_init(chunk->name, chunk->alignment);
+		cm_memset(img->data, 0, row * col * sizeof(uint32_t));
+		if (((struct s_cm_chunk *)chunk)->iterator.index == ((struct s_cm_chunk *)chunk)->size)
+			((struct s_cm_chunk *)chunk)->next = cm_chunk_init(((struct s_cm_chunk *)chunk)->name, ((struct s_cm_chunk *)chunk)->alignment);
 		return (img);
 	}
 	return (NULL);
@@ -66,10 +73,10 @@ void	te_img_fill(t_te_img *img, uint32_t col)
 	uint32_t	y;
 
 	x = 0;
-	while (x < TR_H - 1)
+	while (x < TE_H - 1)
 	{
 		y = 0;
-		while (y < TR_W)
+		while (y < TE_W)
 		{
 			te_img_set_pixel(img, col, x, y);
 			y++;

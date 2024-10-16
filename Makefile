@@ -6,11 +6,11 @@
 #    By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 17:09:56 by rgramati          #+#    #+#              #
-#    Updated: 2024/10/08 17:36:38 by rgramati         ###   ########.fr        #
+#    Updated: 2024/10/17 00:38:10 by rgramati         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-LIBNAME		:=	libtr
+LIBNAME		:=	libterm
 
 SRC_DIR		:=	src
 
@@ -18,11 +18,12 @@ OBJS_DIR	:=	build
 
 LIBDIR		:=	lib
 
-SRCS		:=	term.c		\
-				te_str.c	\
-				te_screen.c	\
-				te_img.c	\
-				te_anim.c	\
+SRCS		:=	core/terminal.c		\
+				core/screen.c		\
+				core/images.c		\
+				core/animation.c	\
+				core/strings.c		\
+				core/hooks.c		\
 				utils.c
 
 SRCS		:=	$(addprefix $(SRC_DIR)/, $(SRCS))
@@ -34,7 +35,7 @@ INCLUDES	:=	include
 
 CC			:=	clang
 
-CFLAGS		:=	-Wall -Wextra -Werror -g3 -O3
+CFLAGS		:=	-Wall -Wextra -Werror -g3
 
 COPTS		:=	-I ./$(INCLUDES) -I ./$(LIBDIR)/cmem/$(INCLUDES)
 
@@ -50,10 +51,10 @@ all:		$(CMEM) $(LIBNAME)
 
 $(LIBNAME): $(OBJS)
 	@ar rc $@.a $^
-	@echo " $(GREEN)$(BOLD)$(ITALIC)■$(RESET)  linking	$(GRAY)$(BOLD)$(ITALIC)$(LIBNAME)$(RESET)"
+	@echo " $(GREEN)$(BOLD)$(ITALIC)■$(RESET)  linking	$(GREEN)$(BOLD)$(ITALIC)$(LIBNAME)$(RESET)"
 
 so:			$(SOBJS)
-	@$(CC) -shared -o $(LIBNAME).so $^
+	@$(CC) -shared -o $(LIBNAME).so $^ -L $(LIBDIR)/$(CMEM) -lcmem
 
 $(OBJS_DIR)/PIC/%.o: %.c
 	@mkdir -p $(@D)
@@ -71,17 +72,18 @@ $(CMEM):
 
 clean:
 	@if [ -d $(OBJS_DIR) ]; then \
-		echo " $(RED)$(BOLD)$(ITALIC)■$(RESET)  deleted	$(GRAY)$(BOLD)$(ITALIC)$(OBJS_DIR)$(RESET)"; \
+		echo " $(RED)$(BOLD)$(ITALIC)■$(RESET)  deleted	$(RED)$(BOLD)$(ITALIC)$(LIBNAME)/$(OBJS_DIR)$(RESET)"; \
 		$(RM) $(OBJS_DIR); \
 	fi
 
 fclean:		clean
+	@make -C $(LIBDIR)/$(CMEM) --no-print-directory fclean
 	@if [ -f "$(LIBNAME).a" ]; then \
-		echo " $(RED)$(BOLD)$(ITALIC)■$(RESET)  deleted	$(GRAY)$(BOLD)$(ITALIC)$(LIBNAME).a$(RESET)"; \
+		echo " $(RED)$(BOLD)$(ITALIC)■$(RESET)  deleted	$(RED)$(BOLD)$(ITALIC)$(LIBNAME).a$(RESET)"; \
 		$(RM) $(LIBNAME).a; \
 	fi;
 	@if [ -f "$(LIBNAME).so" ]; then \
-		echo " $(RED)$(BOLD)$(ITALIC)■$(RESET)  deleted	$(GRAY)$(BOLD)$(ITALIC)$(LIBNAME).so$(RESET)"; \
+		echo " $(RED)$(BOLD)$(ITALIC)■$(RESET)  deleted	$(RED)$(BOLD)$(ITALIC)$(LIBNAME).so$(RESET)"; \
 		$(RM) $(LIBNAME).so; \
 	fi;
 
