@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/05 20:37:07 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/16 22:52:32 by rgramati         ###   ########.fr       //
+//   Updated: 2024/10/23 02:13:14 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -80,6 +80,8 @@ void	te_screen_put_img(t_screen screen, t_te_img *img, uint32_t x, uint32_t y)
 			color = img->data[index];
 			if (color == TE_RGB_TRANSPARENT)
 				color = TE_RGB_BLACK;
+			else
+				color |= 0xFF000000;
 			if (color & 0xFF000000)
 				te_screen_set_pixel(screen, col + x, row + y, color);
 			col++;

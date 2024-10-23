@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/02 14:15:54 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/17 00:24:58 by rgramati         ###   ########.fr       //
+//   Updated: 2024/10/23 02:19:39 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -19,8 +19,7 @@
 # include <assert.h>
 # include <sys/ioctl.h>
 
-# define CM_LIMG_IMPLEMENTAION
-# define CM_CHUNK_IMPLEMENTATION
+# define CM_INCLUDE_ALL
 # include <cmem.h>
 
 # define TE_COLOR_TABLE \
@@ -129,8 +128,10 @@ struct s_terminal
 	uint32_t		col;
 	uint32_t		row;
 	uint32_t		ifps;
-	t_cm_chunk		*imgs;
-	t_cm_chunk		*anims;
+	t_cm_chunk		*images;
+	t_cm_chunk		*tilesets;
+	t_cm_chunk		*tile_images;
+	t_cm_htable		*htilesets;
 	t_screen		screen;
 	t_screen		back;
 	t_hook_tab		hook_table;
@@ -186,8 +187,8 @@ struct s_te_img
 	uint32_t	*data;
 };
 
-t_te_img
-*te_img_init(t_terminal *t, uint32_t row, uint32_t col);
+void
+te_img_init(t_te_img *img, uint32_t row, uint32_t col, uint32_t *data);
 
 void
 te_img_destroy(t_te_img *img);
@@ -211,6 +212,33 @@ t_te_anim
 
 void
 te_anim_destroy(t_terminal *t, t_te_anim *anim);
+
+/* TILESET ***************************************************************** */
+
+typedef struct s_te_tileset
+{
+	uint32_t	tiles[232];	// image indices in t->images
+	char		name[16];
+	uint32_t	tile_count;
+	uint32_t	res;
+}	t_te_tileset;
+
+typedef struct s_te_tile_img
+{
+	uint32_t	indices[244];
+	uint32_t	res;
+	uint32_t	col;
+	uint32_t	row;
+}	t_te_tile_img;
+
+void
+te_tileset_init(t_terminal *t, const char *name, const char *filename, uint32_t res);
+
+t_te_tile_img
+*te_tileset_img_init(t_terminal *t, const char *tileset, uint32_t col, uint32_t row, ...);
+
+void
+te_screen_put_tile_img(t_terminal *t, t_te_tile_img *img, uint32_t x, uint32_t y);
 
 /* SCREEN ****************************************************************** */
 

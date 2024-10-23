@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/09/16 15:26:53 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/17 00:36:15 by rgramati         ###   ########.fr       //
+//   Updated: 2024/10/23 01:35:47 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -53,7 +53,11 @@ t_terminal	*te_init(void)
 		t->back = te_screen_init();
 		te_set_mode(TE_MODE_RENDER);
 		te_ansi(TE_ANSI_CLEAR TE_ANSI_CURSOR_OFF);
-		if (!t->screen || !t->back)
+		t->images = cm_chunk_init("images", sizeof(t_te_img));
+		t->tilesets = cm_chunk_init("tilesets", sizeof(t_te_tileset));
+		t->tile_images = cm_chunk_init("timages", sizeof(t_te_tile_img));
+		t->htilesets = cm_htable_init(64);
+		if (!t->screen || !t->back || !t->images || !t->tilesets || !t->tile_images)
 		{
 			te_destroy(t);
 			return (NULL);
@@ -64,8 +68,22 @@ t_terminal	*te_init(void)
 
 void	te_destroy(t_terminal *t)
 {
+	t_te_img	*tmp;
+
+	if (!t)
+		return ;
 	te_screen_destroy(t->screen);
 	te_screen_destroy(t->back);
+	tmp = cm_chunk_it_next(t->images);
+	while (tmp)
+	{
+		te_img_destroy((t_te_img *)tmp);
+		tmp = cm_chunk_it_next(t->images);
+	}
+	cm_chunk_clear(t->images, CM_CLEAR_FREE);
+	cm_chunk_clear(t->tilesets, CM_CLEAR_FREE);
+	cm_chunk_clear(t->tile_images, CM_CLEAR_FREE);
+	cm_htable_clear(t->htilesets, CM_CLEAR_FREE);
 	te_set_mode(TE_MODE_BACKUP);
 	te_ansi(TE_ANSI_CURSOR_ON);
 	te_ansi(TE_ANSI_CLEAR TE_ANSI_RESET);
@@ -98,8 +116,6 @@ void	te_loop(t_terminal *t)
 		*(uint32_t *)seq = 0;
 		if (read(STDIN_FILENO, &seq, 4) < 0)
 			break ;
-		// if (seq[0] == TE_ESQ)
-			// te_handle_escape();
 		if (seq[0] == TE_EOF)
 			break ;
 		te_handle_keys(t, seq);
