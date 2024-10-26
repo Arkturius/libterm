@@ -6,7 +6,7 @@
 #    By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 17:09:56 by rgramati          #+#    #+#              #
-#    Updated: 2024/10/23 01:31:20 by rgramati         ###   ########.fr        #
+#    Updated: 2024/10/24 21:07:30 by rgramati         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,11 +20,15 @@ LIBDIR		:=	lib
 
 SRCS		:=	core/terminal.c		\
 				core/screen.c		\
+				core/draw.c			\
 				core/images.c		\
 				core/tileset.c		\
 				core/animation.c	\
 				core/strings.c		\
 				core/hooks.c		\
+				tools/etile/etile.c			\
+				tools/etile/etile_keys.c	\
+				tools/etile/etile_keys2.c	\
 				utils.c
 
 SRCS		:=	$(addprefix $(SRC_DIR)/, $(SRCS))

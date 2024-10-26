@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/02 14:15:54 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/23 02:19:39 by rgramati         ###   ########.fr       //
+//   Updated: 2024/10/26 01:46:35 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -16,7 +16,6 @@
 # include <unistd.h>
 # include <stdint.h>
 # include <termios.h>
-# include <assert.h>
 # include <sys/ioctl.h>
 
 # define CM_INCLUDE_ALL
@@ -105,13 +104,27 @@ typedef struct s_llist
 	struct s_llist	*next;
 }	t_llist;
 
+typedef struct s_vec2
+{
+	int32_t	x;
+	int32_t	y;
+}	t_vec2;
+
+typedef struct s_fvec2
+{
+	float	x;
+	float	y;
+}	t_fvec2;
+
 /* TERMINAL ***************************************************************** */
+
+#define TE_HOOK	te_terminal_hook
 
 enum e_hook_types
 {
 	TE_KEYDOWN,
 	TE_LOOP,
-	TE_KEYUP = 128
+	TE_ESCAPE = 128,
 };
 
 typedef void	*(* t_hook_func)(void *);
@@ -159,19 +172,22 @@ void
 te_screen_destroy(t_screen screen);
 
 void
-te_screen_set_pixel(t_screen screen, uint32_t x, uint32_t y, uint32_t color);
+te_screen_set_pixel(t_screen screen, t_vec2 pos, uint32_t color);
 
 void
-te_screen_get_pixel(t_screen screen, uint32_t x, uint32_t y, uint32_t *color);
+te_screen_get_pixel(t_screen screen, t_vec2 pos, uint32_t *color);
 
 void
-te_screen_put_img(t_screen screen, t_te_img *img, uint32_t x, uint32_t y);
+te_screen_put_img(t_screen screen, t_te_img *img, t_vec2 pos);
+
+void
+te_screen_draw_line(t_screen screen, t_vec2 start, t_vec2 end, uint32_t color);
+
+void
+te_screen_draw_square(t_screen screen, t_vec2 start, t_vec2 size, uint32_t color);
 
 void
 te_terminal_screen_shift(t_terminal *t);
-
-uint32_t
-te_terminal_img_index(t_terminal *t, t_te_img *img);
 
 void
 te_ansi(const char *seq);
@@ -194,10 +210,10 @@ void
 te_img_destroy(t_te_img *img);
 
 void
-te_img_set_pixel(t_te_img *img, uint32_t x, uint32_t y, uint32_t color);
+te_img_set_pixel(t_te_img *img, t_vec2 pos, uint32_t color);
 
 void
-te_img_get_pixel(t_te_img *img, uint32_t x, uint32_t y, uint32_t *color);
+te_img_get_pixel(t_te_img *img, t_vec2 pos, uint32_t *color);
 
 /* ANIMATIONS ************************************************************** */
 
@@ -225,7 +241,7 @@ typedef struct s_te_tileset
 
 typedef struct s_te_tile_img
 {
-	uint32_t	indices[244];
+	uint32_t	indices[500];
 	uint32_t	res;
 	uint32_t	col;
 	uint32_t	row;
@@ -238,7 +254,7 @@ t_te_tile_img
 *te_tileset_img_init(t_terminal *t, const char *tileset, uint32_t col, uint32_t row, ...);
 
 void
-te_screen_put_tile_img(t_terminal *t, t_te_tile_img *img, uint32_t x, uint32_t y);
+te_screen_put_tile_img(t_terminal *t, t_te_tile_img *img, t_vec2 pos);
 
 /* SCREEN ****************************************************************** */
 

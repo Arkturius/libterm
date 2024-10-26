@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/23 00:56:32 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/23 02:23:08 by rgramati         ###   ########.fr       //
+//   Updated: 2024/10/26 18:35:40 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -15,6 +15,8 @@
 #include <stdarg.h>
 
 #include <termengine.h>
+
+#include <stdio.h>
 
 static void	te_tileset_split_one(t_cm_chunk *chunk, t_te_img *img, uint32_t res)
 {
@@ -73,6 +75,7 @@ t_te_tile_img	*te_tileset_img_init(t_terminal *t, const char *tileset, uint32_t 
 	img = cm_chunk_alloc(t->tile_images);
 	if (img)
 	{
+		cm_memset(img->indices, 255, 244 * sizeof(uint32_t));
 		set = cm_htable_get(t->htilesets, tileset);
 		if (!set)
 			return (NULL);
@@ -95,10 +98,11 @@ t_te_tile_img	*te_tileset_img_init(t_terminal *t, const char *tileset, uint32_t 
 	return (img);
 }
 
-void	te_screen_put_tile_img(t_terminal *t, t_te_tile_img *img, uint32_t x, uint32_t y)
+void	te_screen_put_tile_img(t_terminal *t, t_te_tile_img *img, t_vec2 pos)
 {
 	uint32_t	row;
 	uint32_t	col;
+	t_te_img	*img_ptr;
 
 	row = 0;
 	while (row < img->row)
@@ -106,7 +110,12 @@ void	te_screen_put_tile_img(t_terminal *t, t_te_tile_img *img, uint32_t x, uint3
 		col = 0;
 		while (col < img->col)
 		{
-			te_screen_put_img(t->back, cm_chunk_at(t->images, img->indices[row * img->row + col]), x + img->res * col, y + img->res * row);
+			if (img->indices[row * img->col + col] != (uint32_t)-1)
+			{
+				img_ptr = cm_chunk_at(t->images, img->indices[row * img->col + col]);
+				if (img_ptr)
+					te_screen_put_img(t->screen, img_ptr, (t_vec2){pos.x + img->res * col, pos.y + img->res * row});
+			}
 			col++;
 		}
 		row++;

@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/05 20:37:07 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/23 02:13:14 by rgramati         ###   ########.fr       //
+//   Updated: 2024/10/25 21:38:44 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -48,44 +48,48 @@ void	te_screen_destroy(t_screen screen)
 
 void	te_terminal_screen_shift(t_terminal *t)
 {
-	cm_memcpy(t->screen, t->back, TE_W * TE_H * TE_BLEN + 1);
 	write(STDIN_FILENO, "\033[0;0f", 6);
 	write(STDIN_FILENO, t->screen, TE_W * TE_H * TE_BLEN);
+	cm_memcpy(t->screen, t->back, TE_W * TE_H * TE_BLEN + 1);
 }
 
-void	te_screen_set_pixel(t_screen screen, uint32_t x, uint32_t y, uint32_t color)
+void	te_screen_set_pixel(t_screen screen, t_vec2 pos, uint32_t color)
 {
+	t_vec2		coords;
 	uint32_t	index;
 
-	if (x < 0 || y < 0 || x >= TE_W || (y & ~1) >= TE_H * 2)
+	if (pos.x < 0 || pos.y < 0 || pos.x >= TE_W || (pos.y & ~1) >= TE_H * 2)
 		return ;
-	index = ((TE_BLEN * TE_W) * (y >> 1)) + (TE_BLEN * x) + (19 * (y & 1));
-	te_str_append_color((y & 1), color, (char *)&screen[index], NULL);
+	coords.x = (TE_BLEN * pos.x) + (19 * (pos.y & 1));
+	coords.y = (pos.y >> 1);
+	index = ((TE_BLEN * TE_W) * coords.y) + coords.x;
+	te_str_append_color((pos.y & 1), color, (char *)&screen[index], NULL);
 }
 
-void	te_screen_put_img(t_screen screen, t_te_img *img, uint32_t x, uint32_t y)
+void	te_screen_put_img(t_screen screen, t_te_img *img, t_vec2 pos)
 {
-	uint32_t	row;
-	uint32_t	col;
+	t_vec2		coords;
+	t_vec2		sum;
 	uint32_t	index;
 	uint32_t	color;
 
-	row = 0;
-	while (row < img->row)
+	coords.y = 0;
+	while (coords.y < (int)img->row)
 	{
-		col = 0;
-		while (col < img->col)
+		coords.x = 0;
+		while (coords.x < (int)img->col)
 		{
-			index = row * img->col + col;
+			index = coords.y * img->col + coords.x;
 			color = img->data[index];
+			sum = (t_vec2){coords.x + pos.x, coords.y + pos.y};
 			if (color == TE_RGB_TRANSPARENT)
 				color = TE_RGB_BLACK;
 			else
 				color |= 0xFF000000;
 			if (color & 0xFF000000)
-				te_screen_set_pixel(screen, col + x, row + y, color);
-			col++;
+				te_screen_set_pixel(screen, sum, color);
+			coords.x++;
 		}
-		row++;
+		coords.y++;
 	}
 }

@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/03 17:50:24 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/17 22:06:43 by rgramati         ###   ########.fr       //
+//   Updated: 2024/10/25 21:33:14 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -39,9 +39,9 @@ void	te_img_destroy(t_te_img *img)
 	}
 }
 
-void	te_img_set_pixel(t_te_img *img, uint32_t x, uint32_t y, uint32_t color)
+void	te_img_set_pixel(t_te_img *img, t_vec2 pos, uint32_t color)
 {
-	const uint32_t	index = (img->row * y) + x;
+	const uint32_t	index = (img->row * pos.y) + pos.x;
 
 	img->data[index] = color;
 }
@@ -57,7 +57,7 @@ void	te_img_fill(t_te_img *img, uint32_t col)
 		y = 0;
 		while (y < TE_W)
 		{
-			te_img_set_pixel(img, col, x, y);
+			te_img_set_pixel(img, (t_vec2){x, y}, col);
 			y++;
 		}
 		x++;

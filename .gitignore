@@ -60,3 +60,5 @@ objdumb
 .cache/
 compile_commands.json
 assets
+build
+main.c

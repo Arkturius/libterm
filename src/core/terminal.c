@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/09/16 15:26:53 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/23 01:35:47 by rgramati         ###   ########.fr       //
+//   Updated: 2024/10/25 23:58:55 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -47,6 +47,7 @@ t_terminal	*te_init(void)
 	t = malloc(sizeof(t_terminal));
 	if (t)
 	{
+		cm_memset(t, 0, sizeof(t_terminal));
 		t->row = TE_H * 2;
 		t->col = TE_W;
 		t->screen = te_screen_init();
@@ -95,15 +96,22 @@ void	te_handle_keys(t_terminal *t, char seq[4])
 	const unsigned char	key = (unsigned char)seq[0];
 	uint8_t				*states;
 	t_hook_func			*hooks;
+	void				**params;
 
-	states = t->hook_table.states;
 	hooks = t->hook_table.hooks;
-	if (key > 0 && key < TE_KEYUP)
+	params = t->hook_table.params;
+	states = t->hook_table.states;
+	if (key == TE_ESQ)
+	{
+		if (seq[1] == 91 && hooks[TE_ESCAPE | seq[2]])
+			hooks[TE_ESCAPE | seq[2]](params[TE_ESCAPE | seq[2]]);
+	}
+	if (key > 0 && key < TE_ESCAPE)
 	{
 		if (states[key])
 			states[key] = 0;
 		if (hooks[TE_KEYDOWN | key])
-			hooks[TE_KEYDOWN | key](t->hook_table.params[TE_KEYDOWN | key]);
+			hooks[TE_KEYDOWN | key](params[TE_KEYDOWN | key]);
 	}	
 }
 
