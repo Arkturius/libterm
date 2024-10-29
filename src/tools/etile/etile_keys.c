@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/23 23:26:06 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/25 01:18:51 by rgramati         ###   ########.fr       //
+//   Updated: 2024/10/26 20:02:01 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -73,10 +73,8 @@ void	*__te_etile_key_switch(void *etile_ptr)
 	t_te_etile	*etile;
 
 	etile = (t_te_etile *)etile_ptr;
-	if (etile->tool.flags == TE_ETILE_MODE_SELECT)
-		etile->tool.flags = TE_ETILE_MODE_EDITOR;
-	else if (etile->tool.flags == TE_ETILE_MODE_EDITOR)
-		etile->tool.flags = TE_ETILE_MODE_SELECT;
+	etile->tool.flags ^= TE_ETILE_MODE_EDITOR;
+	etile->tool.flags ^= TE_ETILE_MODE_SELECT;
 	etile->tool.flags |= TE_ETILE_MODE_SWITCH;
 	return (NULL);
 }

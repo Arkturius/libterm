@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/23 23:27:07 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/25 23:41:49 by rgramati         ###   ########.fr       //
+//   Updated: 2024/10/26 19:50:23 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -43,7 +43,10 @@ typedef struct s_te_etile
 
 #define TE_ETILE_PLACE		__te_etile_key_place
 #define TE_ETILE_DELETE		__te_etile_key_delete
+#define TE_ETILE_BRUSH		__te_etile_key_brush
+#define TE_ETILE_ERASER		__te_etile_key_eraser
 #define TE_ETILE_SELECT		__te_etile_key_select
+
 #define TE_ETILE_SAVE		__te_etile_key_save
 #define TE_ETILE_LOAD		__te_etile_key_load
 
@@ -67,6 +70,12 @@ void
 
 void
 *__te_etile_key_delete(void *etile_ptr);
+
+void
+*__te_etile_key_brush(void *etile_ptr);
+
+void
+*__te_etile_key_eraser(void *etile_ptr);
 
 void
 *__te_etile_key_select(void *etile_ptr);

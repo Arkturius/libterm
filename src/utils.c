@@ -6,23 +6,39 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/04 21:05:50 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/16 22:54:41 by rgramati         ###   ########.fr       //
+//   Updated: 2024/10/29 00:39:14 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
+#include <stdint.h>
+#include <sys/time.h>
 #include <termengine.h>
 #include <unistd.h>
 
 void	te_terminal_fps_max(t_terminal *term, uint32_t fps)
 {
-	float		delta;
-	uint32_t	idelta;
-
 	if (fps == 0 || fps > 120)
 		return ;
-	delta = 1. / fps;
-	idelta = delta * 1000000;
-	term->ifps = idelta;
+	term->fps = fps;
+}
+
+void	te_sleep(uint32_t fps)
+{
+	struct timeval	start;
+	struct timeval	end;
+	uint64_t		elapsed_time;
+	uint64_t		sleep_time;
+
+	sleep_time = 1000000 / fps;
+	gettimeofday(&start, NULL);
+	while (1)
+	{
+		gettimeofday(&end, NULL);
+		elapsed_time = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
+		if (elapsed_time >= sleep_time)
+			break;
+		// usleep(120);
+	}
 }
 
 #ifdef _STDIO_H

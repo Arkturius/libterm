@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/02 14:15:54 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/26 01:46:35 by rgramati         ###   ########.fr       //
+//   Updated: 2024/10/29 00:36:21 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -140,7 +140,7 @@ struct s_terminal
 {
 	uint32_t		col;
 	uint32_t		row;
-	uint32_t		ifps;
+	uint32_t		fps;
 	t_cm_chunk		*images;
 	t_cm_chunk		*tilesets;
 	t_cm_chunk		*tile_images;
@@ -163,28 +163,31 @@ void
 te_terminal_fps_max(t_terminal *t, uint32_t fps);
 
 void
+te_sleep(uint32_t usecs);
+
+void
 te_terminal_hook(t_terminal *t, uint32_t type, t_hook_func func, void *param);
 
 t_screen
-te_screen_init(void);
+te_screen_init(t_terminal *t);
 
 void
 te_screen_destroy(t_screen screen);
 
 void
-te_screen_set_pixel(t_screen screen, t_vec2 pos, uint32_t color);
+te_screen_set_pixel(t_terminal *t, t_vec2 pos, uint32_t color);
 
 void
-te_screen_get_pixel(t_screen screen, t_vec2 pos, uint32_t *color);
+te_screen_get_pixel(t_terminal *t, t_vec2 pos, uint32_t *color);
 
 void
-te_screen_put_img(t_screen screen, t_te_img *img, t_vec2 pos);
+te_screen_put_img(t_terminal *t, t_te_img *img, t_vec2 pos);
 
 void
-te_screen_draw_line(t_screen screen, t_vec2 start, t_vec2 end, uint32_t color);
+te_screen_draw_line(t_terminal *t, t_vec2 start, t_vec2 end, uint32_t color);
 
 void
-te_screen_draw_square(t_screen screen, t_vec2 start, t_vec2 size, uint32_t color);
+te_screen_draw_square(t_terminal *t, t_vec2 start, t_vec2 size, uint32_t color);
 
 void
 te_terminal_screen_shift(t_terminal *t);
@@ -215,20 +218,6 @@ te_img_set_pixel(t_te_img *img, t_vec2 pos, uint32_t color);
 void
 te_img_get_pixel(t_te_img *img, t_vec2 pos, uint32_t *color);
 
-/* ANIMATIONS ************************************************************** */
-
-struct s_te_anim
-{
-	uint8_t		frames[32];
-	uint32_t	count;
-};
-
-t_te_anim
-*te_anim_init(const char *dirname, t_cm_chunk *chunk);
-
-void
-te_anim_destroy(t_terminal *t, t_te_anim *anim);
-
 /* TILESET ***************************************************************** */
 
 typedef struct s_te_tileset
@@ -251,7 +240,7 @@ void
 te_tileset_init(t_terminal *t, const char *name, const char *filename, uint32_t res);
 
 t_te_tile_img
-*te_tileset_img_init(t_terminal *t, const char *tileset, uint32_t col, uint32_t row, ...);
+*te_tileset_img_init(t_terminal *t, const char *name, t_vec2 pos, ...);
 
 void
 te_screen_put_tile_img(t_terminal *t, t_te_tile_img *img, t_vec2 pos);

@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/23 00:56:32 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/26 18:35:40 by rgramati         ###   ########.fr       //
+//   Updated: 2024/10/27 22:11:38 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -15,8 +15,6 @@
 #include <stdarg.h>
 
 #include <termengine.h>
-
-#include <stdio.h>
 
 static void	te_tileset_split_one(t_cm_chunk *chunk, t_te_img *img, uint32_t res)
 {
@@ -64,9 +62,9 @@ static void	te_tileset_split(t_cm_chunk *chunk, t_te_img *img, uint32_t res)
 	img->y = tmp.y;
 }
 
-t_te_tile_img	*te_tileset_img_init(t_terminal *t, const char *tileset, uint32_t col, uint32_t row, ...)
+t_te_tile_img	*te_tileset_img_init(t_terminal *t, const char *tileset, t_vec2 size, ...)
 {
-	uint32_t		coords[2];
+	t_vec2			coords;
 	uint32_t		index;
 	t_te_tile_img	*img;
 	t_te_tileset	*set;
@@ -80,20 +78,20 @@ t_te_tile_img	*te_tileset_img_init(t_terminal *t, const char *tileset, uint32_t 
 		if (!set)
 			return (NULL);
 		img->res = set->res;
-		va_start(tiles, row);
-		coords[0] = -1;
-		while (++coords[0] < row)
+		va_start(tiles, size);
+		coords.y = -1;
+		while (++coords.y < size.y)
 		{
-			coords[1] = -1;
-			while (++coords[1] < col)
+			coords.x = -1;
+			while (++coords.x < size.x)
 			{
 				index = va_arg(tiles, uint32_t);
-				img->indices[coords[0] * col + coords[1]] = set->tiles[index];
+				img->indices[coords.y * size.y + coords.x] = set->tiles[index];
 			}
 		}
 		va_end(tiles);
-		img->col = col;
-		img->row = row;
+		img->col = size.x;
+		img->row = size.y;
 	}
 	return (img);
 }
@@ -114,7 +112,7 @@ void	te_screen_put_tile_img(t_terminal *t, t_te_tile_img *img, t_vec2 pos)
 			{
 				img_ptr = cm_chunk_at(t->images, img->indices[row * img->col + col]);
 				if (img_ptr)
-					te_screen_put_img(t->screen, img_ptr, (t_vec2){pos.x + img->res * col, pos.y + img->res * row});
+					te_screen_put_img(t, img_ptr, (t_vec2){pos.x + img->res * col, pos.y + img->res * row});
 			}
 			col++;
 		}

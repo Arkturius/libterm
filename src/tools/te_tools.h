@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/23 23:30:17 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/24 01:57:55 by rgramati         ###   ########.fr       //
+//   Updated: 2024/10/26 19:49:30 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -25,6 +25,8 @@ enum e_tool_flags
 	TE_ETILE_MODE_SELECT = 1,
 	TE_ETILE_MODE_EDITOR = 1 << 1,
 	TE_ETILE_MODE_SWITCH = 1 << 2,
+	TE_ETILE_MODE_BRUSH = 1 << 3,
+	TE_ETILE_MODE_ERASE = 1 << 4,
 };
 
 typedef struct s_tool_data

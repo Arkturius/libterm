@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/05 20:24:21 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/24 20:54:34 by rgramati         ###   ########.fr       //
+//   Updated: 2024/10/27 19:54:41 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -92,43 +92,4 @@ const char	*te_dir_next_file(void)
 		entry = readdir(current_dir);
 	cm_memcpy(&filename, entry->d_name, 256);
 	return ((const char *)&filename);
-}
-
-
-t_te_anim	*te_anim_init(const char *dirname, t_cm_chunk *chunk)
-{
-	t_te_anim	*anim;
-	// t_te_img	frame;
-	const char	*file;
-	// void		*ptr;
-	// uint32_t	size;
-
-	(void) chunk;
-	anim = malloc(sizeof(t_te_anim));
-	te_dir_open(dirname);
-	if (anim)
-	{
-		while (1)
-		{
-			file = te_dir_next_file();
-			if (!file)
-				break ;
-			printf("file = %s\n", file);
-		}
-		// frame = (t_te_img){0};
-		// size = cm_bmp(file, &frame.data, CM_OPEN_LOAD);
-		// frame.col = size >> 16;
-		// frame.row = size & 0xFFFF;
-		// ptr = cm_chunk_push(chunk, &frame, sizeof(t_te_img));
-		// anim->frames[anim->count++] = cm_chunk_index(chunk, ptr);
-	}
-	te_dir_close();
-	return (anim);
-}
-
-void	te_anim_destroy(t_terminal *t, t_te_anim *anim)
-{
-	(void)anim;
-	(void)t;
-	// TODO : implement chunk free list to make this more convenient (viable for entity destroy too)
 }

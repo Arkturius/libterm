@@ -6,13 +6,14 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/09/16 15:26:53 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/25 23:58:55 by rgramati         ###   ########.fr       //
+//   Updated: 2024/10/29 00:36:55 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <sys/ioctl.h>
 #include <termengine.h>
 #include <unistd.h>
 
@@ -40,6 +41,15 @@ static uint32_t	te_set_mode(uint32_t mode)
 	return (0);
 }
 
+static void	te_terminal_get_size(uint32_t *row, uint32_t *col)
+{
+	struct winsize	win;
+
+	ioctl(STDIN_FILENO, TIOCGWINSZ, &win);
+	*row = win.ws_row;
+	*col = win.ws_col;
+}
+
 t_terminal	*te_init(void)
 {
 	t_terminal	*t;
@@ -48,10 +58,9 @@ t_terminal	*te_init(void)
 	if (t)
 	{
 		cm_memset(t, 0, sizeof(t_terminal));
-		t->row = TE_H * 2;
-		t->col = TE_W;
-		t->screen = te_screen_init();
-		t->back = te_screen_init();
+		te_terminal_get_size(&t->row, &t->col);
+		t->screen = te_screen_init(t);
+		t->back = te_screen_init(t);
 		te_set_mode(TE_MODE_RENDER);
 		te_ansi(TE_ANSI_CLEAR TE_ANSI_CURSOR_OFF);
 		t->images = cm_chunk_init("images", sizeof(t_te_img));
@@ -70,16 +79,20 @@ t_terminal	*te_init(void)
 void	te_destroy(t_terminal *t)
 {
 	t_te_img	*tmp;
+	t_cm_chunk	*ctmp;
 
 	if (!t)
 		return ;
 	te_screen_destroy(t->screen);
 	te_screen_destroy(t->back);
-	tmp = cm_chunk_it_next(t->images);
-	while (tmp)
+	ctmp = t->images;
+	tmp = cm_chunk_it_next(ctmp);
+	while (ctmp)
 	{
 		te_img_destroy((t_te_img *)tmp);
-		tmp = cm_chunk_it_next(t->images);
+		tmp = cm_chunk_it_next(ctmp);
+		if (!tmp)
+			ctmp = cm_chunk_next(ctmp);
 	}
 	cm_chunk_clear(t->images, CM_CLEAR_FREE);
 	cm_chunk_clear(t->tilesets, CM_CLEAR_FREE);
@@ -130,7 +143,7 @@ void	te_loop(t_terminal *t)
 		if (t->hook_table.hooks[TE_LOOP])
 			t->hook_table.hooks[TE_LOOP](t->hook_table.params[TE_LOOP]);
 		te_terminal_screen_shift(t);
-		usleep(t->ifps);
+		te_sleep(t->fps);
 	}
 }
 
