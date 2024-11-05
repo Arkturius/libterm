@@ -60,4 +60,3 @@ objdumb
 .cache/
 compile_commands.json
 build
-*.bmp
