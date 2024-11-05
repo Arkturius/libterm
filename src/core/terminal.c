@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/09/16 15:26:53 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/29 00:36:55 by rgramati         ###   ########.fr       //
+//   Updated: 2024/11/01 16:35:36 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -72,6 +72,7 @@ t_terminal	*te_init(void)
 			te_destroy(t);
 			return (NULL);
 		}
+		t->active = 1;
 	}
 	return (t);
 }
@@ -132,7 +133,7 @@ void	te_loop(t_terminal *t)
 {
 	char		seq[4];
 
-	while (42)
+	while (t->active)
 	{
 		*(uint32_t *)seq = 0;
 		if (read(STDIN_FILENO, &seq, 4) < 0)

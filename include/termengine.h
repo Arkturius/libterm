@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/02 14:15:54 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/29 00:36:21 by rgramati         ###   ########.fr       //
+//   Updated: 2024/11/01 16:34:39 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -141,6 +141,7 @@ struct s_terminal
 	uint32_t		col;
 	uint32_t		row;
 	uint32_t		fps;
+	uint32_t		active;
 	t_cm_chunk		*images;
 	t_cm_chunk		*tilesets;
 	t_cm_chunk		*tile_images;
