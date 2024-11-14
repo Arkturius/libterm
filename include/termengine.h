@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/02 14:15:54 by rgramati          #+#    #+#             //
-//   Updated: 2024/11/01 16:34:39 by rgramati         ###   ########.fr       //
+//   Updated: 2024/11/13 19:14:56 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -159,6 +159,9 @@ te_destroy(t_terminal *t);
 
 void
 te_loop(t_terminal *t);
+
+void
+te_loop_end(t_terminal *t);
 
 void
 te_terminal_fps_max(t_terminal *t, uint32_t fps);

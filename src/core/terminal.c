@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/09/16 15:26:53 by rgramati          #+#    #+#             //
-//   Updated: 2024/11/01 16:35:36 by rgramati         ###   ########.fr       //
+//   Updated: 2024/11/13 20:01:45 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -63,9 +63,9 @@ t_terminal	*te_init(void)
 		t->back = te_screen_init(t);
 		te_set_mode(TE_MODE_RENDER);
 		te_ansi(TE_ANSI_CLEAR TE_ANSI_CURSOR_OFF);
-		t->images = cm_chunk_init("images", sizeof(t_te_img));
-		t->tilesets = cm_chunk_init("tilesets", sizeof(t_te_tileset));
-		t->tile_images = cm_chunk_init("timages", sizeof(t_te_tile_img));
+		t->images = cm_chunk_init(sizeof(t_te_img));
+		t->tilesets = cm_chunk_init(sizeof(t_te_tileset));
+		t->tile_images = cm_chunk_init(sizeof(t_te_tile_img));
 		t->htilesets = cm_htable_init(64);
 		if (!t->screen || !t->back || !t->images || !t->tilesets || !t->tile_images)
 		{
@@ -103,6 +103,11 @@ void	te_destroy(t_terminal *t)
 	te_ansi(TE_ANSI_CURSOR_ON);
 	te_ansi(TE_ANSI_CLEAR TE_ANSI_RESET);
 	free(t);
+}
+
+void	te_loop_end(t_terminal *t)
+{
+	t->active = 0;
 }
 
 void	te_handle_keys(t_terminal *t, char seq[4])
