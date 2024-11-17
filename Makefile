@@ -6,7 +6,7 @@
 #    By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 17:09:56 by rgramati          #+#    #+#              #
-#    Updated: 2024/10/24 21:07:30 by rgramati         ###   ########.fr        #
+#    Updated: 2024/11/17 23:33:41 by kiroussa         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -48,11 +48,17 @@ RM			:=	rm -rf
 
 CMEM		:=	cmem
 
+SO			?= 0
+
 #
 # Rules
 #
 
+ifeq ($(SO), 0)
 all:		$(CMEM) $(LIBNAME)
+else
+all:		$(CMEM) $(LIBNAME) so
+endif
 
 $(LIBNAME): $(OBJS)
 	@ar rc $@.a $^
