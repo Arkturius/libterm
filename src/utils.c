@@ -1,14 +1,14 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   utils.c                                            :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2024/10/04 21:05:50 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/29 00:39:14 by rgramati         ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/10/04 21:05:50 by rgramati          #+#    #+#             */
+/*   Updated: 2024/11/17 23:56:36 by kiroussa         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include <stdint.h>
 #include <sys/time.h>
@@ -34,10 +34,11 @@ void	te_sleep(uint32_t fps)
 	while (1)
 	{
 		gettimeofday(&end, NULL);
-		elapsed_time = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
+		elapsed_time = (end.tv_sec - start.tv_sec) * 1000000
+			+ (end.tv_usec - start.tv_usec);
 		if (elapsed_time >= sleep_time)
-			break;
-		// usleep(120);
+			break ;
+		usleep(30);
 	}
 }
 
@@ -85,4 +86,3 @@ void	te_ansi(const char *seq)
 
 # endif	// FT_PRINTF_H
 #endif	// _STDIO_H
-

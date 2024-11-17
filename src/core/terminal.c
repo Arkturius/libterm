@@ -1,14 +1,14 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   terminal.c                                         :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2024/09/16 15:26:53 by rgramati          #+#    #+#             //
-//   Updated: 2024/11/13 20:01:45 by rgramati         ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   terminal.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/16 15:26:53 by rgramati          #+#    #+#             */
+/*   Updated: 2024/11/17 23:57:00 by kiroussa         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -17,38 +17,8 @@
 #include <termengine.h>
 #include <unistd.h>
 
-#define TE_MODE_RENDER	1
-#define TE_MODE_BACKUP	0
-
-static uint32_t	te_set_mode(uint32_t mode)
-{
-	struct termios			attr;
-	static struct termios	back;
-
-	if (!isatty(STDIN_FILENO))
-		return (1);
-	tcgetattr(STDIN_FILENO, &back);
-	if (mode == TE_MODE_RENDER)
-	{
-		attr = back;
-		attr.c_lflag &= ~(ICANON | ECHO);
-		attr.c_cc[VMIN] = 0;
-		attr.c_cc[VTIME] = 0;
-		tcsetattr(STDIN_FILENO, TCSAFLUSH, &attr);
-	}
-	else
-		tcsetattr(STDIN_FILENO, TCSANOW, &back);
-	return (0);
-}
-
-static void	te_terminal_get_size(uint32_t *row, uint32_t *col)
-{
-	struct winsize	win;
-
-	ioctl(STDIN_FILENO, TIOCGWINSZ, &win);
-	*row = win.ws_row;
-	*col = win.ws_col;
-}
+uint32_t	te_set_mode(uint32_t mode);
+void		te_terminal_get_size(uint32_t *row, uint32_t *col);
 
 t_terminal	*te_init(void)
 {
@@ -64,10 +34,7 @@ t_terminal	*te_init(void)
 		te_set_mode(TE_MODE_RENDER);
 		te_ansi(TE_ANSI_CLEAR TE_ANSI_CURSOR_OFF);
 		t->images = cm_chunk_init(sizeof(t_te_img));
-		t->tilesets = cm_chunk_init(sizeof(t_te_tileset));
-		t->tile_images = cm_chunk_init(sizeof(t_te_tile_img));
-		t->htilesets = cm_htable_init(64);
-		if (!t->screen || !t->back || !t->images || !t->tilesets || !t->tile_images)
+		if (!t->screen || !t->back || !t->images)
 		{
 			te_destroy(t);
 			return (NULL);
@@ -96,9 +63,6 @@ void	te_destroy(t_terminal *t)
 			ctmp = cm_chunk_next(ctmp);
 	}
 	cm_chunk_clear(t->images, CM_CLEAR_FREE);
-	cm_chunk_clear(t->tilesets, CM_CLEAR_FREE);
-	cm_chunk_clear(t->tile_images, CM_CLEAR_FREE);
-	cm_htable_clear(t->htilesets, CM_CLEAR_FREE);
 	te_set_mode(TE_MODE_BACKUP);
 	te_ansi(TE_ANSI_CURSOR_ON);
 	te_ansi(TE_ANSI_CLEAR TE_ANSI_RESET);
@@ -131,7 +95,7 @@ void	te_handle_keys(t_terminal *t, char seq[4])
 			states[key] = 0;
 		if (hooks[TE_KEYDOWN | key])
 			hooks[TE_KEYDOWN | key](params[TE_KEYDOWN | key]);
-	}	
+	}
 }
 
 void	te_loop(t_terminal *t)
@@ -152,4 +116,3 @@ void	te_loop(t_terminal *t)
 		te_sleep(t->fps);
 	}
 }
-

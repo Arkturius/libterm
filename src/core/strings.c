@@ -1,14 +1,14 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   strings.c                                          :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2024/10/02 14:15:32 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/27 19:49:00 by rgramati         ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   strings.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/10/02 14:15:32 by rgramati          #+#    #+#             */
+/*   Updated: 2024/11/17 23:48:49 by kiroussa         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include <stdint.h>
 #include <termengine.h>
@@ -40,7 +40,8 @@ char	*tr_color(uint32_t color)
 	return (buffer);
 }
 
-void	te_str_append_color(uint32_t mode, uint32_t color, char *cursor, char **remain)
+void	te_str_append_color(uint32_t mode, uint32_t color,
+			char *cursor, char **remain)
 {
 	const char	*prefix;
 
