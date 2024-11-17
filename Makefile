@@ -6,7 +6,7 @@
 #    By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 17:09:56 by rgramati          #+#    #+#              #
-#    Updated: 2024/10/24 21:07:30 by rgramati         ###   ########.fr        #
+#    Updated: 2024/11/17 23:49:51 by kiroussa         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,16 +19,12 @@ OBJS_DIR	:=	build
 LIBDIR		:=	lib
 
 SRCS		:=	core/terminal.c		\
+				core/terminal2.c	\
 				core/screen.c		\
 				core/draw.c			\
 				core/images.c		\
-				core/tileset.c		\
-				core/animation.c	\
 				core/strings.c		\
 				core/hooks.c		\
-				tools/etile/etile.c			\
-				tools/etile/etile_keys.c	\
-				tools/etile/etile_keys2.c	\
 				utils.c
 
 SRCS		:=	$(addprefix $(SRC_DIR)/, $(SRCS))
@@ -47,6 +43,8 @@ COPTS		:=	-I ./$(INCLUDES) -I ./$(LIBDIR)/cmem/$(INCLUDES)
 RM			:=	rm -rf
 
 CMEM		:=	cmem
+
+SO			?= 0
 
 #
 # Rules

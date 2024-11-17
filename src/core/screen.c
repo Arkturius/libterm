@@ -1,14 +1,14 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   screen.c                                           :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2024/10/05 20:37:07 by rgramati          #+#    #+#             //
-//   Updated: 2024/11/13 23:45:45 by rgramati         ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   screen.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/10/05 20:37:07 by rgramati          #+#    #+#             */
+/*   Updated: 2024/11/17 23:47:56 by kiroussa         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include <fcntl.h>
 #include <stdint.h>
@@ -58,7 +58,8 @@ void	te_screen_set_pixel(t_terminal *t, t_vec2 pos, uint32_t color)
 	t_vec2		coords;
 	uint32_t	index;
 
-	if (pos.x < 0 || pos.y < 0 || (uint32_t)pos.x >= t->col || (uint32_t)(pos.y & ~1) >= t->row * 2)
+	if (pos.x < 0 || pos.y < 0 || (uint32_t)pos.x >= t->col
+		|| (uint32_t)(pos.y & ~1) >= t->row * 2)
 		return ;
 	coords.x = (TE_BLEN * pos.x) + (19 * (pos.y & 1));
 	coords.y = (pos.y >> 1);
