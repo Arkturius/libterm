@@ -6,7 +6,7 @@
 /*   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 14:15:54 by rgramati          #+#    #+#             */
-/*   Updated: 2024/11/17 23:53:19 by kiroussa         ###   ########.fr       */
+/*   Updated: 2024/11/18 00:16:04 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,7 +130,7 @@ enum e_hook_types
 	TE_ESCAPE = 128,
 };
 
-typedef void	*(*t_hook_func)(void *);
+typedef void				*(*t_hook_func)(void *);
 
 struct s_hook_tab
 {
