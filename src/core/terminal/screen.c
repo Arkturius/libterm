@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/05 20:37:07 by rgramati          #+#    #+#             //
-//   Updated: 2024/11/13 23:45:45 by rgramati         ###   ########.fr       //
+//   Updated: 2024/11/17 18:53:40 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -16,7 +16,6 @@
 #include <stdlib.h>
 
 #include <termengine.h>
-#include <unistd.h>
 
 t_screen	te_screen_init(t_terminal *t)
 {

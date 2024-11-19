@@ -6,7 +6,7 @@
 #    By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 17:09:56 by rgramati          #+#    #+#              #
-#    Updated: 2024/10/24 21:07:30 by rgramati         ###   ########.fr        #
+#    Updated: 2024/11/18 14:10:23 by rgramati         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,18 +18,27 @@ OBJS_DIR	:=	build
 
 LIBDIR		:=	lib
 
-SRCS		:=	core/terminal.c		\
-				core/screen.c		\
-				core/draw.c			\
-				core/images.c		\
-				core/tileset.c		\
-				core/animation.c	\
-				core/strings.c		\
-				core/hooks.c		\
-				tools/etile/etile.c			\
+SRCS		:=	core/terminal/terminal.c	\
+				core/terminal/screen.c		\
+				core/terminal/draw.c		\
+				core/terminal/images.c		\
+				core/events/events.c		\
+				core/events/events_funcs.c	\
+				core/events/hooks.c			\
+				core/events/timer.c			\
+				ecs/ecs.c					\
+				ecs/entity.c				\
+											\
+				uintmask.c					\
+				ptrmask.c					\
+				utils.c						\
+
+ifeq ($(ETILE), 1)
+	SRCS	+=	tools/etile/etile.c			\
 				tools/etile/etile_keys.c	\
-				tools/etile/etile_keys2.c	\
-				utils.c
+				tools/etile/etile_keys2.c
+endif
+
 
 SRCS		:=	$(addprefix $(SRC_DIR)/, $(SRCS))
 

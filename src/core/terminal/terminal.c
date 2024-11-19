@@ -6,10 +6,11 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/09/16 15:26:53 by rgramati          #+#    #+#             //
-//   Updated: 2024/11/13 20:01:45 by rgramati         ###   ########.fr       //
+//   Updated: 2024/11/18 16:43:50 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
+#include <X11/Xlib.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -63,11 +64,10 @@ t_terminal	*te_init(void)
 		t->back = te_screen_init(t);
 		te_set_mode(TE_MODE_RENDER);
 		te_ansi(TE_ANSI_CLEAR TE_ANSI_CURSOR_OFF);
-		t->images = cm_chunk_init(sizeof(t_te_img));
-		t->tilesets = cm_chunk_init(sizeof(t_te_tileset));
-		t->tile_images = cm_chunk_init(sizeof(t_te_tile_img));
-		t->htilesets = cm_htable_init(64);
-		if (!t->screen || !t->back || !t->images || !t->tilesets || !t->tile_images)
+		t->images = cm_chunk_init(sizeof(t_te_img), NULL, 0);
+		t->color = TE_RGB_BLUE;
+		te_events_init(t);
+		if (!t->screen || !t->back || !t->images || !t->events.display)
 		{
 			te_destroy(t);
 			return (NULL);
@@ -81,24 +81,30 @@ void	te_destroy(t_terminal *t)
 {
 	t_te_img	*tmp;
 	t_cm_chunk	*ctmp;
+	uint32_t	i;
 
 	if (!t)
 		return ;
 	te_screen_destroy(t->screen);
 	te_screen_destroy(t->back);
+	i = 0;
 	ctmp = t->images;
-	tmp = cm_chunk_it_next(ctmp);
-	while (ctmp)
+	tmp = cm_chunk_at(ctmp, i);
+	while (tmp)
 	{
-		te_img_destroy((t_te_img *)tmp);
-		tmp = cm_chunk_it_next(ctmp);
-		if (!tmp)
+		if (i == cm_chunk_size(ctmp))
+		{
+			i = 0;
 			ctmp = cm_chunk_next(ctmp);
+			if (!ctmp)
+				break ;
+		}
+		tmp = cm_chunk_at(ctmp, i);
+		te_img_destroy(tmp);
+		i++;
 	}
 	cm_chunk_clear(t->images, CM_CLEAR_FREE);
-	cm_chunk_clear(t->tilesets, CM_CLEAR_FREE);
-	cm_chunk_clear(t->tile_images, CM_CLEAR_FREE);
-	cm_htable_clear(t->htilesets, CM_CLEAR_FREE);
+	te_events_destroy(t);
 	te_set_mode(TE_MODE_BACKUP);
 	te_ansi(TE_ANSI_CURSOR_ON);
 	te_ansi(TE_ANSI_CLEAR TE_ANSI_RESET);
@@ -110,46 +116,52 @@ void	te_loop_end(t_terminal *t)
 	t->active = 0;
 }
 
-void	te_handle_keys(t_terminal *t, char seq[4])
+void	te_keys_handle(t_terminal *t)
 {
-	const unsigned char	key = (unsigned char)seq[0];
-	uint8_t				*states;
-	t_hook_func			*hooks;
-	void				**params;
+	uint32_t	key;
+	t_hook_func	*funcs;
+	void		**params;
 
-	hooks = t->hook_table.hooks;
-	params = t->hook_table.params;
-	states = t->hook_table.states;
-	if (key == TE_ESQ)
+	key = 0;
+	funcs = t->hook_table.keyboard_hooks;
+	params = t->hook_table.keyboard_params;
+	while (key < TE_HOOK_KEYBOARD)
 	{
-		if (seq[1] == 91 && hooks[TE_ESCAPE | seq[2]])
-			hooks[TE_ESCAPE | seq[2]](params[TE_ESCAPE | seq[2]]);
+		if (t->keyboard[key] && funcs[key])
+			funcs[key](params[key]);
+		key++;
 	}
-	if (key > 0 && key < TE_ESCAPE)
+}
+
+void	te_mouse_handle(t_terminal *t)
+{
+	uint32_t	key;
+	t_hook_func	*funcs;
+	void		**params;
+
+	key = 0;
+	funcs = t->hook_table.mouse_hooks;
+	params = t->hook_table.mouse_params;
+	while (key < TE_HOOK_MOUSE)
 	{
-		if (states[key])
-			states[key] = 0;
-		if (hooks[TE_KEYDOWN | key])
-			hooks[TE_KEYDOWN | key](params[TE_KEYDOWN | key]);
-	}	
+		if (t->mouse[key] && funcs[key])
+			funcs[key](params[key]);
+		key++;
+	}
 }
 
 void	te_loop(t_terminal *t)
 {
-	char		seq[4];
-
 	while (t->active)
 	{
-		*(uint32_t *)seq = 0;
-		if (read(STDIN_FILENO, &seq, 4) < 0)
-			break ;
-		if (seq[0] == TE_EOF)
-			break ;
-		te_handle_keys(t, seq);
+		te_events_handle(t);
+		te_keys_handle(t);
+		te_mouse_handle(t);
 		if (t->hook_table.hooks[TE_LOOP])
 			t->hook_table.hooks[TE_LOOP](t->hook_table.params[TE_LOOP]);
 		te_terminal_screen_shift(t);
-		te_sleep(t->fps);
+		te_delta_time(t);
+		te_usleep(1000 / (t->fps));
 	}
 }
 

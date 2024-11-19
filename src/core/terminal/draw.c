@@ -6,12 +6,19 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/24 20:52:28 by rgramati          #+#    #+#             //
-//   Updated: 2024/10/28 20:49:33 by rgramati         ###   ########.fr       //
+//   Updated: 2024/11/17 18:55:06 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include <stdint.h>
 #include <termengine.h>
+
+static inline int32_t	te_abs(int32_t n)
+{
+	if (n < 0)
+		return (-n);
+	return (n);
+}
 
 void	te_screen_draw_square(t_terminal *t, t_vec2 start, t_vec2 size, uint32_t color)
 {
@@ -21,13 +28,6 @@ void	te_screen_draw_square(t_terminal *t, t_vec2 start, t_vec2 size, uint32_t co
 	te_screen_draw_line(t, (t_vec2){end.x, start.y}, end, color);
 	te_screen_draw_line(t, end, (t_vec2){start.x, end.y}, color);
 	te_screen_draw_line(t, (t_vec2){start.x, end.y}, (t_vec2)start, color);
-}
-
-static int32_t	te_abs(int32_t n)
-{
-	if (n < 0)
-		return (-n);
-	return (n);
 }
 
 void	te_screen_draw_line(t_terminal *t, t_vec2 start, t_vec2 end, uint32_t color)

@@ -6,20 +6,24 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/02 14:15:54 by rgramati          #+#    #+#             //
-//   Updated: 2024/11/13 19:14:56 by rgramati         ###   ########.fr       //
+//   Updated: 2024/11/18 22:22:02 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
-#ifndef TERMRENDER_H
-# define TERMRENDER_H
+#ifndef TERMENGINE_H
+# define TERMENGINE_H
 
 # include <unistd.h>
 # include <stdint.h>
 # include <termios.h>
 # include <sys/ioctl.h>
 
+# include <X11/Xlib.h>
+
 # define CM_INCLUDE_ALL
 # include <cmem.h>
+
+# include <te_keycodes.h>
 
 # define TE_COLOR_TABLE \
 	"000\000001\000002\000003\000004\000005\000006\000007\000"\
@@ -75,6 +79,30 @@
 # define TE_ANSI_CURSOR_ON	"\033[?25h"
 # define TE_ANSI_CURSOR_OFF	"\033[?25l"
 
+uint64_t
+te_uint_mask(uint64_t ptr, uint64_t mask);
+
+uint64_t
+te_uint_unmask(uint64_t ptr, uint64_t mask);
+
+uint64_t
+te_uint_testmask(uint64_t ptr, uint64_t mask);
+
+uint64_t
+te_uint_andmask(uint64_t ptr, uint64_t mask);
+
+void
+*te_ptr_mask(void *ptr, uint64_t mask);
+
+void
+*te_ptr_unmask(void *ptr, uint64_t mask);
+
+void
+*te_ptr_testmask(void *ptr, uint64_t mask);
+
+void
+*te_ptr_andmask(void *ptr, uint64_t mask);
+
 typedef enum e_rgb_colors
 {
 	TE_RGB_BLACK		= 0x00000000,
@@ -88,15 +116,20 @@ typedef enum e_rgb_colors
 	TE_RGB_TRANSPARENT	= TE_RGB_MAGENTA
 }	t_rgb_colors;
 
-typedef uint8_t				*t_screen;
+typedef struct s_terminal		t_terminal;
+typedef uint8_t					*t_screen;
 
-typedef struct s_terminal	t_terminal;
+typedef struct s_timers			t_timers;
 
-typedef struct s_hook_tab	t_hook_tab;
+typedef struct s_event_window	t_event_window;
+typedef	void					(*te_event_func)(t_terminal *, XEvent *);
 
-typedef struct s_te_img		t_te_img;
+typedef struct s_hook_info		t_hook_info;
+typedef struct s_hook_tab		t_hook_tab;
+typedef void					*(* t_hook_func)(void *);
 
-typedef struct s_te_anim	t_te_anim;
+typedef struct s_te_img			t_te_img;
+typedef struct s_te_anim		t_te_anim;
 
 typedef struct s_llist
 {
@@ -116,25 +149,129 @@ typedef struct s_fvec2
 	float	y;
 }	t_fvec2;
 
+struct s_vec4
+{
+	int32_t	x;
+	int32_t	y;
+	int32_t	z;
+	int32_t	w;
+};
+
+typedef float	__attribute__((aligned(16), vector_size(16))) t_afvec4;
+
+typedef struct s_fvec4
+{
+	float	x;
+	float	y;
+	float	z;
+	float	w;
+}	t_fvec4;
+
+union u_fvec4
+{
+	t_afvec4	vec4;
+	t_fvec4		v4;
+};
+
 /* TERMINAL ***************************************************************** */
 
-#define TE_HOOK	te_terminal_hook
+# define TE_HOOK		te_terminal_hook
+# define TE_SET_PIXEL	te_screen_set_pixel
+# define TE_GET_PIXEL	te_screen_get_pixel
+
+struct s_timers
+{
+	struct timespec	past;
+	struct timespec	curr;
+	double			delta_t;
+};
+
+void	te_delta_time(t_terminal *t);
+
+void	te_usleep(uint32_t micro);
 
 enum e_hook_types
 {
-	TE_KEYDOWN,
+	TE_KEYBOARD,
 	TE_LOOP,
-	TE_ESCAPE = 128,
+	TE_MOUSE,
 };
 
-typedef void	*(* t_hook_func)(void *);
+struct s_hook_info
+{
+	uint32_t	type;
+	uint32_t	key;
+};
+
+# define TE_HOOK_TOTAL		256
+# define TE_HOOK_KEYBOARD	160
+# define TE_HOOK_MISC		91
+# define TE_HOOK_MOUSE		5
 
 struct s_hook_tab
 {
-	t_hook_func	hooks[256];
-	void		*params[256];
-	uint8_t		states[256];
+	union
+	{
+		t_hook_func	hooks[TE_HOOK_TOTAL];
+		struct
+		{
+			t_hook_func	keyboard_hooks[TE_HOOK_KEYBOARD];
+			t_hook_func	misc_hooks[TE_HOOK_MISC];
+			t_hook_func	mouse_hooks[TE_HOOK_MOUSE];
+		};
+	};
+	union
+	{
+		void		*params[TE_HOOK_TOTAL];
+		struct
+		{
+			void	*keyboard_params[TE_HOOK_KEYBOARD];
+			void	*misc_params[TE_HOOK_MISC];
+			void	*mouse_params[TE_HOOK_MOUSE];
+		};
+	};
 };
+
+enum e_events_flags
+{
+	TE_EVENTS_ENABLED = 1ULL << 0,
+	TE_EVENTS_PK = 1ULL << 1,
+};
+
+struct	s_event_window
+{
+	Display		*display;
+	Window		win;
+	t_vec2		mouse;
+	uint64_t	flags;
+};
+
+void
+te_events_init(t_terminal *t);
+
+void
+te_events_destroy(t_terminal *t);
+
+void
+te_events_peek(t_terminal *t, XEvent *event, uint32_t val);
+
+void
+te_events_handle(t_terminal *t);
+
+void
+te_events_keydown(t_terminal *t, XEvent *event);
+
+void
+te_events_keyup(t_terminal *t, XEvent *event);
+
+void
+te_events_mousedown(t_terminal *t, XEvent *event);
+
+void
+te_events_mouseup(t_terminal *t, XEvent *event);
+
+void
+te_events_mousemove(t_terminal *t, XEvent *event);
 
 struct s_terminal
 {
@@ -142,13 +279,33 @@ struct s_terminal
 	uint32_t		row;
 	uint32_t		fps;
 	uint32_t		active;
+	t_timers		time;
 	t_cm_chunk		*images;
-	t_cm_chunk		*tilesets;
-	t_cm_chunk		*tile_images;
-	t_cm_htable		*htilesets;
+	t_event_window	events;
+	union
+	{
+		uint8_t			key_table[TE_HOOK_TOTAL];
+		struct
+		{
+			uint8_t		keyboard[TE_HOOK_KEYBOARD];
+			uint8_t		misc[TE_HOOK_MISC];
+			uint8_t		mouse[TE_HOOK_MOUSE];
+		};
+	};
+	union
+	{
+		struct timespec		cooldowns[TE_HOOK_TOTAL];
+		struct
+		{
+			struct timespec	keyboard_cooldowns[TE_HOOK_KEYBOARD];
+			struct timespec	misc_cooldowns[TE_HOOK_MISC];
+			struct timespec	mouse_cooldowns[TE_HOOK_MOUSE];
+		};
+	};
 	t_screen		screen;
 	t_screen		back;
 	t_hook_tab		hook_table;
+	uint32_t		color;
 };
 
 t_terminal
@@ -167,37 +324,7 @@ void
 te_terminal_fps_max(t_terminal *t, uint32_t fps);
 
 void
-te_sleep(uint32_t usecs);
-
-void
-te_terminal_hook(t_terminal *t, uint32_t type, t_hook_func func, void *param);
-
-t_screen
-te_screen_init(t_terminal *t);
-
-void
-te_screen_destroy(t_screen screen);
-
-void
-te_screen_set_pixel(t_terminal *t, t_vec2 pos, uint32_t color);
-
-void
-te_screen_get_pixel(t_terminal *t, t_vec2 pos, uint32_t *color);
-
-void
-te_screen_put_img(t_terminal *t, t_te_img *img, t_vec2 pos);
-
-void
-te_screen_draw_line(t_terminal *t, t_vec2 start, t_vec2 end, uint32_t color);
-
-void
-te_screen_draw_square(t_terminal *t, t_vec2 start, t_vec2 size, uint32_t color);
-
-void
-te_terminal_screen_shift(t_terminal *t);
-
-void
-te_ansi(const char *seq);
+te_terminal_hook(t_terminal *t, t_hook_info i, t_hook_func f, void *p);
 
 /* IMAGES ****************************************************************** */
 
@@ -226,7 +353,7 @@ te_img_get_pixel(t_te_img *img, t_vec2 pos, uint32_t *color);
 
 typedef struct s_te_tileset
 {
-	uint32_t	tiles[232];	// image indices in t->images
+	uint32_t	tiles[232];
 	char		name[16];
 	uint32_t	tile_count;
 	uint32_t	res;
@@ -251,10 +378,39 @@ te_screen_put_tile_img(t_terminal *t, t_te_tile_img *img, t_vec2 pos);
 
 /* SCREEN ****************************************************************** */
 
+t_screen
+te_screen_init(t_terminal *t);
+
+void
+te_screen_destroy(t_screen screen);
+
+void
+te_screen_set_pixel(t_terminal *t, t_vec2 pos, uint32_t color);
+
+void
+te_screen_get_pixel(t_terminal *t, t_vec2 pos, uint32_t *color);
+
+void
+te_screen_put_img(t_terminal *t, t_te_img *img, t_vec2 pos);
+
+void
+te_screen_draw_line(t_terminal *t, t_vec2 start, t_vec2 end, uint32_t color);
+
+void
+te_screen_draw_square(t_terminal *t, t_vec2 start, t_vec2 size, uint32_t color);
+
+void
+te_terminal_screen_shift(t_terminal *t);
+
+/* UTILS ******************************************************************* */
+
 void
 te_str_append(const char *src, char *dst, char **remain);
 
 void
 te_str_append_color(uint32_t mode, uint32_t color, char *cursor, char **remain);
+
+void
+te_ansi(const char *seq);
 
 #endif
