@@ -1,3 +1,9 @@
 [submodule "lib/cmem"]
 	path = lib/cmem
 	url = git@github.com:Arkturius/cmem.git
+[submodule "libcmem"]
+	path = libcmem
+	url = git@github.com:Arkturius/libcmem.git
+[submodule "lib/libcmem"]
+	path = lib/libcmem
+	url = git@github.com:Arkturius/libcmem.git

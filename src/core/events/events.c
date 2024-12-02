@@ -6,7 +6,7 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/11/14 18:55:46 by rgramati          #+#    #+#             //
-//   Updated: 2024/11/18 16:41:23 by rgramati         ###   ########.fr       //
+//   Updated: 2024/12/02 18:58:40 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -30,13 +30,12 @@ void	te_events_init(t_terminal *t)
 			ev.display, root,
 			0, 0, 1920, 1080, 0,
 			CopyFromParent, InputOnly,
-			CopyFromParent, CWOverrideRedirect,
-			&attr
+			CopyFromParent, CWOverrideRedirect, &attr
 		);
 		XSelectInput(
 			ev.display, ev.win,
 			ButtonPressMask | ButtonReleaseMask | PointerMotionMask \
-			| KeyPressMask | KeyReleaseMask
+			| KeyPressMask | KeyReleaseMask | FocusChangeMask
 		);
 		XMapWindow(ev.display, ev.win);
 		t->events = ev;
@@ -67,15 +66,32 @@ void	te_events_peek(t_terminal *t, XEvent *event, uint32_t val)
 	}
 }
 
+#include <stdio.h>
+void	__te_events_focus_in(t_terminal *t, XEvent *event)
+{
+	(void)t;
+	(void)event;
+	dprintf(2, "focus in !!\n");
+}
+
+void	__te_events_focus_out(t_terminal *t, XEvent *event)
+{
+	(void)t;
+	(void)event;
+	dprintf(2, "focus out !!\n");
+}
+
 void	te_events_handle(t_terminal *t)
 {
-	const te_event_func	events[5] =
+	static const te_event_func	events[FocusOut + 1] =
 	{
-		te_events_keydown, 
-		te_events_keyup, 
-		te_events_mousedown, 
-		te_events_mouseup, 
-		te_events_mousemove
+		[KeyPress] = te_events_keydown, 
+		[KeyRelease] = te_events_keyup, 
+		[ButtonPress] = te_events_mousedown, 
+		[ButtonRelease] = te_events_mouseup, 
+		[MotionNotify] = te_events_mousemove,
+		[FocusIn] = __te_events_focus_in,
+		[FocusOut] = __te_events_focus_in
 	};
 	t_event_window		*ev;
 	XEvent				event;
@@ -85,7 +101,8 @@ void	te_events_handle(t_terminal *t)
 	while (XPending(ev->display))
 	{
 		XNextEvent(ev->display, &event);
-		events[event.type - 2](t, &event);
+		if (events[event.type])
+			events[event.type](t, &event);
 		if (event.type == KeyPress && event.xkey.keycode == 9)
 			te_loop_end(t);
 	}

@@ -6,13 +6,14 @@
 //   By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/10/02 14:15:54 by rgramati          #+#    #+#             //
-//   Updated: 2024/11/18 22:22:02 by rgramati         ###   ########.fr       //
+//   Updated: 2024/12/02 19:11:09 by rgramati         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #ifndef TERMENGINE_H
 # define TERMENGINE_H
 
+#include <math.h>
 # include <unistd.h>
 # include <stdint.h>
 # include <termios.h>
@@ -79,29 +80,15 @@
 # define TE_ANSI_CURSOR_ON	"\033[?25h"
 # define TE_ANSI_CURSOR_OFF	"\033[?25l"
 
-uint64_t
-te_uint_mask(uint64_t ptr, uint64_t mask);
+# define te_ptr_mask(ptr, mask)			(ptr) = (void *)((uint64_t)(ptr) | (mask))
+# define te_ptr_unmask(ptr, mask)		(ptr) = (void *)((uint64_t)(ptr) & ~(mask))
+# define te_ptr_testmask(ptr, mask)		((ptr) & (mask))
+# define te_ptr_andmask(ptr, mask)		(((ptr) & (mask)) == (mask))
 
-uint64_t
-te_uint_unmask(uint64_t ptr, uint64_t mask);
-
-uint64_t
-te_uint_testmask(uint64_t ptr, uint64_t mask);
-
-uint64_t
-te_uint_andmask(uint64_t ptr, uint64_t mask);
-
-void
-*te_ptr_mask(void *ptr, uint64_t mask);
-
-void
-*te_ptr_unmask(void *ptr, uint64_t mask);
-
-void
-*te_ptr_testmask(void *ptr, uint64_t mask);
-
-void
-*te_ptr_andmask(void *ptr, uint64_t mask);
+# define te_uint_mask(uint, mask)		(uint) |= (mask)
+# define te_uint_unmask(uint, mask)		(uint) &= ~(mask)
+# define te_uint_testmask(uint, mask)	((uint) & (mask))
+# define te_uint_andmask(uint, mask)	(((uint) & (mask)) == (mask))
 
 typedef enum e_rgb_colors
 {
@@ -173,6 +160,18 @@ union u_fvec4
 	t_fvec4		v4;
 };
 
+typedef union u_color
+{
+	struct
+	{
+		uint8_t	b;
+		uint8_t	g;
+		uint8_t	r;
+		uint8_t	a;
+	};
+	uint32_t	argb;
+}	t_color;
+
 /* TERMINAL ***************************************************************** */
 
 # define TE_HOOK		te_terminal_hook
@@ -243,6 +242,7 @@ struct	s_event_window
 	Display		*display;
 	Window		win;
 	t_vec2		mouse;
+	t_vec2		click;
 	uint64_t	flags;
 };
 
