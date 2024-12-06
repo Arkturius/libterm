@@ -6,7 +6,7 @@
 #    By: rgramati <rgramati@student.42angouleme.fr  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 17:09:56 by rgramati          #+#    #+#              #
-#    Updated: 2024/12/02 18:47:53 by rgramati         ###   ########.fr        #
+#    Updated: 2024/12/02 20:07:01 by rgramati         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -56,10 +56,6 @@ MAKE		+=	--no-print-directory
 
 all:				$(LIB_TOBUILD) $(LIBNAME).a $(LIBNAME).so
 	@$(MAKE) art
-	@echo "COPTS   = $(COPTS)"
-	@echo "LDDIRS  = $(LDDIRS)"
-	@echo "LDFLAGS = $(LDFLAGS)"
-
 
 $(LIBNAME).a:		$(LIB_FILES) $(OBJS)
 	@ar rcs $@ $^
